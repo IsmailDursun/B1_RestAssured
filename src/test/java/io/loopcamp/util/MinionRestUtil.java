@@ -2,7 +2,10 @@ package io.loopcamp.util;
 
 import com.github.javafaker.Faker;
 import io.loopcamp.pojo.Minion;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
+
+import java.util.Map;
 
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
@@ -42,7 +45,8 @@ public class MinionRestUtil {
         Minion newMinion = new Minion();
 
         newMinion.setName(random.name().firstName());  // set random first name
-        newMinion.setPhone(random.phoneNumber().toString().replace("-",""));  // 705-333-3333 ---> 7053333333
+        newMinion.setPhone(random.number().numberBetween(1000000000L, 9999999999L)+"");
+
 
         int randomNum = random.number().numberBetween(1, 3);  // return either 1 or 2
         if (randomNum == 1) {
@@ -59,12 +63,37 @@ public class MinionRestUtil {
         Minion newMinion = new Minion();
 
         given().pathParam("id", id)
-                .when().get("/spartans/{id}")
+                .when().get("/minions/{id}")
                 .then().log().all();
 
 
         return newMinion;
     }
 
+    /**
+     * This method accepts minion id adn sends GET request
+     * @param id
+     * @return JSON response body as MAP
+     */
+    public static Map<String, Object> getMinionInMap (int id) {
 
+        Response response = given().pathParam("id", id)
+                .when().get("/minions/{id}");
+
+//        Map <String, Object> minionInMap = response.as(Map.class);
+//        return minionInMap;
+        return response.as(Map.class);
+
+    }
+    /**
+     * This method accepts minion id
+     * @return JSON body as Minion object
+     */
+    public static Minion getMinionInPOJO (int id) {
+        Response response = given().pathParam("id", id)
+                .when().get("/minions/{id}");
+
+        Minion minionInPojo = response.as(Minion.class);
+        return minionInPojo;
+    }
 }
